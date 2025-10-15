@@ -201,8 +201,8 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     }
     return body as T;
   } catch (err) {
-    console.error('Admin apiFetch network error:', path, err);
-    // Provide friendly mock data for preview when backend is unreachable
+    // Network failure: return lightweight demo data for preview and avoid noisy console errors
+    console.warn('Admin apiFetch network issue — using demo fallback for:', path, err?.message || err);
     const p = path.toLowerCase();
     if (p.includes('/api/auth/users')) {
       return [
@@ -819,7 +819,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                         : ''}
                     </p>
                     <p className="font-bold mt-2">
-                      ₹{Number((order as any).total ?? (order as any).total_amount ?? 0).toLocaleString('en-IN')}
+                      ��{Number((order as any).total ?? (order as any).total_amount ?? 0).toLocaleString('en-IN')}
                     </p>
                   </div>
                   <div className="flex gap-2">
