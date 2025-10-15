@@ -79,28 +79,41 @@ async function start() {
     await mongoose.connect(uri, { dbName: 'UNI10' });
     console.log('Connected to MongoDB (UNI10)');
 
-    // Ensure admin user exists (seed)
+    // Ensure admin and demo user exist (seed)
     try {
       const User = require('./models/User');
       const bcrypt = require('bcrypt');
       const adminEmail = 'uni10@gmail.com';
       const adminPassword = '12345678';
+      const demoEmail = 'sachin@gmail.com';
+      const demoPassword = '123456';
       (async () => {
-        const existing = await User.findOne({ email: adminEmail.toLowerCase() });
-        if (!existing) {
+        // Admin
+        const existingAdmin = await User.findOne({ email: adminEmail.toLowerCase() });
+        if (!existingAdmin) {
           const hash = await bcrypt.hash(adminPassword, 10);
           await User.create({ name: 'UNI10 Admin', email: adminEmail.toLowerCase(), passwordHash: hash, role: 'admin' });
           console.log('Admin user created:', adminEmail);
-        } else if (existing.role !== 'admin') {
-          existing.role = 'admin';
-          await existing.save();
+        } else if (existingAdmin.role !== 'admin') {
+          existingAdmin.role = 'admin';
+          await existingAdmin.save();
           console.log('Existing user promoted to admin:', adminEmail);
         } else {
           console.log('Admin user already exists');
         }
-      })().catch((e) => console.error('Failed to seed admin user', e));
+
+        // Demo user (sachin)
+        const existingDemo = await User.findOne({ email: demoEmail.toLowerCase() });
+        if (!existingDemo) {
+          const hash2 = await bcrypt.hash(demoPassword, 10);
+          await User.create({ name: 'Sachin', email: demoEmail.toLowerCase(), passwordHash: hash2, role: 'user' });
+          console.log('Demo user created:', demoEmail);
+        } else {
+          console.log('Demo user already exists');
+        }
+      })().catch((e) => console.error('Failed to seed users', e));
     } catch (e) {
-      console.error('Failed to seed admin user', e);
+      console.error('Failed to seed users', e);
     }
 
     app.listen(PORT, () => {
