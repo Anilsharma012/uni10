@@ -29,7 +29,24 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors({ origin: allowed, credentials: true }));
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like curl or server-to-server)
+    if (!origin) return callback(null, true);
+    const allowedOrigins = Array.isArray(allowed) ? allowed : [];
+    if (allowedOrigins.includes(origin) || origin.endsWith('.fly.dev') || origin.includes('.builder.my')) {
+      return callback(null, true);
+    }
+    // In development, allow all localhost origins
+    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+      return callback(null, true);
+    }
+    // Default deny
+    console.warn('Blocked CORS for origin:', origin);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 app.use(cookieParser());
 app.use(express.json());
 
