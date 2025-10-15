@@ -40,7 +40,7 @@ function formatDate(iso: string) {
 }
 
 export default function Dashboard() {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const { items: cartItems, addToCart, count } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
