@@ -69,7 +69,8 @@ export async function api(path: string, options: RequestInit = {}) {
     const json = await res.json().catch(() => ({}));
     return { ok: res.ok, status: res.status, json };
   } catch (error: any) {
-    console.error("API fetch failed:", url, error);
+    // Network failures are common in preview/iframe environments; return demo fallbacks and avoid noisy errors.
+    console.warn("API fetch failed (using mock fallback):", url, error?.message || error);
     // Preview environments (like the remote iframe) often can't reach localhost backend.
     // Provide lightweight mock fallback for common admin endpoints so the UI can be inspected.
     try {
