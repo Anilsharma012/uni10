@@ -472,9 +472,19 @@ const Admin = () => {
     // avoid performing network uploads that will fail and spam the console. Use a placeholder instead.
     try {
       const baseCheck = API_BASE || '';
+      // If API_BASE is explicitly localhost and we're in a remote preview, avoid upload attempts
       if (baseCheck && isLocalhost(baseCheck) && !location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1')) {
         setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
         toast.warn('Backend is localhost and unreachable from preview — using placeholder image');
+        setUploadingImage(false);
+        return;
+      }
+
+      // If no API_BASE is set (empty -> using relative '/api') but we're running in a remote preview
+      // the relative endpoint will not reach the developer's backend. Avoid making the request and use placeholder.
+      if (!baseCheck && !location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1')) {
+        setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
+        toast.warn('Uploads are disabled in remote preview — using placeholder image');
         setUploadingImage(false);
         return;
       }
