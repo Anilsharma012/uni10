@@ -468,6 +468,20 @@ const Admin = () => {
       }
     };
 
+    // If API_BASE points to localhost but this frontend is running in a remote preview iframe,
+    // avoid performing network uploads that will fail and spam the console. Use a placeholder instead.
+    try {
+      const baseCheck = API_BASE || '';
+      if (baseCheck && isLocalhost(baseCheck) && !location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1')) {
+        setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
+        toast.warn('Backend is localhost and unreachable from preview — using placeholder image');
+        setUploadingImage(false);
+        return;
+      }
+    } catch (e) {
+      // ignore and continue to try real upload
+    }
+
     const tryUpload = async (uploadUrl: string) => {
       const fd = new FormData();
       fd.append('file', file);
