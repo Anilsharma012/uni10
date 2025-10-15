@@ -216,6 +216,22 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
         { id: 'prod-2', name: 'Demo Hoodie', price: 1299, category: 'Hoodies', image_url: '/src/assets/product-hoodie-1.jpg', stock: 5 },
       ] as unknown as T;
     }
+    if (p.includes('/api/orders')) {
+      return [
+        {
+          _id: 'order-demo-1',
+          id: 'order-demo-1',
+          total: 1498,
+          total_amount: 1498,
+          status: 'pending',
+          items: [
+            { productId: 'prod-1', name: 'Demo Tee', qty: 2, price: 499 },
+          ],
+          createdAt: new Date().toISOString(),
+          user: { _id: 'demo-1', name: 'Sachin', email: 'sachin@gmail.com' },
+        },
+      ] as unknown as T;
+    }
     if (p.includes('/api/settings')) {
       return {} as T;
     }
