@@ -280,7 +280,13 @@ const Admin = () => {
     if (authLoading) return;
 
     if (!isAdmin) {
-      toast.error('Access denied. Admin privileges required.');
+      // If the user is authenticated but not admin, send them to dashboard instead of /auth
+      if (adminUser) {
+        toast.error('Access denied. Admin privileges required.');
+        navigate('/dashboard');
+        return;
+      }
+      // Not authenticated: send to auth page
       navigate('/auth');
       return;
     }
@@ -288,7 +294,7 @@ const Admin = () => {
     void fetchAdminResources();
     void fetchIntegrationSettings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdmin, authLoading]);
+  }, [isAdmin, authLoading, adminUser]);
 
   const fetchAdminResources = async () => {
     try {
