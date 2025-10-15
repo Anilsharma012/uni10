@@ -485,19 +485,28 @@ const Admin = () => {
     const tryUpload = async (uploadUrl: string) => {
       const fd = new FormData();
       fd.append('file', file);
-      const res = await fetch(uploadUrl, {
-        method: 'POST',
-        credentials: 'include',
-        body: fd,
-      });
-      let json: any = null;
       try {
-        json = await res.json();
-      } catch {
-        // ignore non-json
+        const res = await fetch(uploadUrl, {
+          method: 'POST',
+          credentials: 'include',
+          body: fd,
+        });
+        let json: any = null;
+        try {
+          json = await res.json();
+        } catch {
+          // ignore non-json
+        }
+        if (!res.ok) {
+          console.warn('upload request returned non-ok status', uploadUrl, res.status, json);
+          return null;
+        }
+        return json;
+      } catch (fetchErr) {
+        // Network fetch failed (e.g., blocked from preview iframe). Log once and return null so caller can fallback gracefully.
+        console.warn('upload fetch failed (network):', uploadUrl, fetchErr?.message || fetchErr);
+        return null;
       }
-      if (!res.ok) throw new Error(json?.message || json?.error || `${res.status} ${res.statusText}`);
-      return json;
     };
 
     try {
