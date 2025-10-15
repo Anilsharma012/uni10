@@ -486,9 +486,14 @@ const Admin = () => {
       const fd = new FormData();
       fd.append('file', file);
       try {
+        const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
+        const headers: Record<string,string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         const res = await fetch(uploadUrl, {
           method: 'POST',
           credentials: 'include',
+          headers,
           body: fd,
         });
         let json: any = null;
