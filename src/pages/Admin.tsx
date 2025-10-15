@@ -33,9 +33,8 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
-const API_BASE =
-  (import.meta as any).env?.VITE_API_BASE_URL ||
-  (typeof window !== 'undefined' ? `${window.location.origin}` : '');
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '';
+// Using an empty API_BASE defaults to relative '/api' paths which works in preview where backend is proxied.
 
 const ENDPOINTS = {
   products: '/api/products',
