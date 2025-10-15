@@ -546,7 +546,7 @@ const Admin = () => {
 
       // No url returned — use placeholder
       setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
-      toast.warn('Upload did not return a URL; using placeholder image');
+      toast.error('Upload did not return a URL; using placeholder image');
     } catch (err: any) {
       // Final fallback: use placeholder image so the UI remains functional in preview
       setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
