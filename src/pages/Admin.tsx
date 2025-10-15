@@ -517,7 +517,9 @@ const Admin = () => {
       if (base && isLocalhost(base) && !location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1')) {
         try {
           const relJson = await tryUpload('/api/uploads');
+          if (!relJson) throw new Error('Relative upload returned no response');
           const url = relJson?.url || relJson?.data?.url;
+          if (!url) throw new Error('Relative upload did not return a url');
           const full = url && url.startsWith('http') ? url : (url ? url : '/placeholder.svg');
           setProductForm((p) => ({ ...p, image_url: full }));
           toast.success('Image uploaded (via relative /api fallback)');
