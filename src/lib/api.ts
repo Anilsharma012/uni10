@@ -94,6 +94,24 @@ export async function api(path: string, options: RequestInit = {}) {
           ] },
         };
       }
+      if (p.includes('/api/orders')) {
+        return {
+          ok: true,
+          status: 200,
+          json: { ok: true, data: [
+            {
+              _id: 'order-demo-1',
+              id: 'order-demo-1',
+              total: 1498,
+              total_amount: 1498,
+              status: 'pending',
+              items: [{ productId: 'prod-1', name: 'Demo Tee', qty: 2, price: 499 }],
+              createdAt: new Date().toISOString(),
+              user: { _id: 'demo-1', name: 'Sachin', email: 'sachin@gmail.com' },
+            },
+          ] },
+        };
+      }
       if (p.includes('/api/settings')) {
         return { ok: true, status: 200, json: { ok: true, data: {} } };
       }
