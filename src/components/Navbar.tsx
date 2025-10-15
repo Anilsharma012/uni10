@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Link } from "react-router-dom";
 import { ShoppingCart, Search, Menu, User, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
