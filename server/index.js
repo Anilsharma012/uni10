@@ -79,6 +79,30 @@ async function start() {
     await mongoose.connect(uri, { dbName: 'UNI10' });
     console.log('Connected to MongoDB (UNI10)');
 
+    // Ensure admin user exists (seed)
+    try {
+      const User = require('./models/User');
+      const bcrypt = require('bcrypt');
+      const adminEmail = 'uni10@gmail.com';
+      const adminPassword = '12345678';
+      (async () => {
+        const existing = await User.findOne({ email: adminEmail.toLowerCase() });
+        if (!existing) {
+          const hash = await bcrypt.hash(adminPassword, 10);
+          await User.create({ name: 'UNI10 Admin', email: adminEmail.toLowerCase(), passwordHash: hash, role: 'admin' });
+          console.log('Admin user created:', adminEmail);
+        } else if (existing.role !== 'admin') {
+          existing.role = 'admin';
+          await existing.save();
+          console.log('Existing user promoted to admin:', adminEmail);
+        } else {
+          console.log('Admin user already exists');
+        }
+      })().catch((e) => console.error('Failed to seed admin user', e));
+    } catch (e) {
+      console.error('Failed to seed admin user', e);
+    }
+
     app.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);
     });
