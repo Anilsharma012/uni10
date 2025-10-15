@@ -474,7 +474,7 @@ const Admin = () => {
       const baseCheck = API_BASE || '';
       if (baseCheck && isLocalhost(baseCheck) && !location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1')) {
         setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
-        toast.warn('Backend is localhost and unreachable from preview — using placeholder image');
+        toast.error('Backend is localhost and unreachable from preview — using placeholder image');
         setUploadingImage(false);
         return;
       }
