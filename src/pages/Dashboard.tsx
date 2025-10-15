@@ -157,7 +157,7 @@ export default function Dashboard() {
               <span className="text-sm mr-2">Cart Items:</span>
               <span className="bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs font-bold">{count}</span>
             </Link>
-            <Button variant="outline" onClick={async () => { await (async () => { try { const { signOut } = useAuth(); /* unreachable - replaced below */ } catch {} })(); }}>
+            <Button variant="outline" onClick={async () => { try { await signOut(); navigate('/'); toast({ title: 'Signed out' }); } catch { navigate('/'); } }}>
               Logout
             </Button>
           </div>
