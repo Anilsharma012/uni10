@@ -177,10 +177,73 @@ function normalizeSettings(raw: any): IntegrationSettings {
 }
 
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const isLocalhost = (url: string) => {
+    try {
+      return url.includes('localhost') || url.includes('127.0.0.1');
+    } catch {
+      return false;
+    }
+  };
+
+  const joinUrl = (base: string, p: string) => {
+    if (!base) return p;
+    if (p.startsWith('http')) return p;
+    if (!base.endsWith('/') && !p.startsWith('/')) return `${base}/${p}`;
+    if (base.endsWith('/') && p.startsWith('/')) return `${base}${p.slice(1)}`;
+    return `${base}${p}`;
+  };
+
+  const url = path.startsWith('http') ? path : joinUrl(API_BASE, path);
+
+  // If API_BASE points to localhost but the app is not running on localhost, attempt a relative '/api' fallback
+  if (
+    API_BASE &&
+    isLocalhost(API_BASE) &&
+    !location.hostname.includes('localhost') &&
+    !location.hostname.includes('127.0.0.1')
+  ) {
+    console.warn(`API_BASE is '${API_BASE}' (localhost). Frontend running on '${location.hostname}' — trying relative '/api' fallback for ${path}`);
+    const relUrl = path.startsWith('http')
+      ? path
+      : (path.startsWith('/api') ? path : `/api${path.startsWith('/') ? path : `/${path}`}`);
+
+    try {
+      const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
+      const relHeaders = { 'Content-Type': 'application/json', ...(options.headers || {}) } as Record<string,string>;
+      if (token) relHeaders['Authorization'] = `Bearer ${token}`;
+
+      const relRes = await fetch(relUrl, {
+        credentials: 'include',
+        headers: relHeaders,
+        ...options,
+      });
+
+      let relBody: any = null;
+      try { relBody = await relRes.json(); } catch {}
+
+      if (!relRes.ok) {
+        const msg = relBody?.message || relBody?.error || `${relRes.status} ${relRes.statusText}`;
+        throw new Error(msg);
+      }
+
+      if (relBody && typeof relBody === 'object' && relBody !== null && 'data' in relBody) {
+        return relBody.data as T;
+      }
+      return relBody as T;
+    } catch (relErr) {
+      console.warn('Relative /api fetch failed:', relErr?.message || relErr);
+      // Fall through and try API_BASE below
+    }
+  }
+
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) } as Record<string,string>;
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(url, {
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      headers,
       ...options,
     });
 
@@ -188,7 +251,7 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     try {
       body = await res.json();
     } catch {
-      // ignore non-json payloads
+      // ignore non-json
     }
 
     if (!res.ok) {
@@ -201,7 +264,6 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     }
     return body as T;
   } catch (err) {
-    // Network failure: return lightweight demo data for preview and avoid noisy console errors
     console.warn('Admin apiFetch network issue — using demo fallback for:', path, err?.message || err);
     const p = path.toLowerCase();
     if (p.includes('/api/auth/users')) {
@@ -236,7 +298,8 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
       return {} as T;
     }
 
-    throw err;
+    // Unknown endpoint: return empty object instead of throwing to avoid uncaught rejections in preview
+    return {} as T;
   }
 }
 
