@@ -238,6 +238,7 @@ const Admin = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [productForm, setProductForm] = useState<ProductFormState>(EMPTY_FORM);
 
   const [settings, setSettings] = useState<IntegrationSettings>(createDefaultSettings);
@@ -340,7 +341,33 @@ const Admin = () => {
     }
   };
 
-  const handleProductSubmit = async (e: React.FormEvent) => {
+  const uploadFile = async (file: File) => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`${API_BASE}/api/uploads`, {
+        method: 'POST',
+        credentials: 'include',
+        body: fd,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.message || json?.error || 'Upload failed');
+      const url = json?.url || json?.data?.url;
+      if (url) {
+        const full = url.startsWith('http') ? url : `${API_BASE}${url}`;
+        setProductForm((p) => ({ ...p, image_url: full }));
+        toast.success('Image uploaded');
+      }
+    } catch (err: any) {
+      toast.error(err?.message || 'Image upload failed');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const price = Number(productForm.price);
@@ -621,12 +648,29 @@ const Admin = () => {
               </div>
               <div>
                 <Label htmlFor="image_url">Image URL</Label>
-                <Input
-                  id="image_url"
-                  value={productForm.image_url}
-                  onChange={(e) => setProductForm((p) => ({ ...p, image_url: e.target.value }))}
-                  required
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="image_url"
+                    value={productForm.image_url}
+                    onChange={(e) => setProductForm((p) => ({ ...p, image_url: e.target.value }))}
+                    required
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="image_file"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) void uploadFile(f);
+                        e.currentTarget.value = '';
+                      }}
+                    />
+                    <Button type="button" onClick={() => {}} disabled={uploadingImage}>
+                      {uploadingImage ? 'Uploading...' : 'Upload'}
+                    </Button>
+                  </div>
+                </div>
               </div>
               <div>
                 <Label htmlFor="category">Category</Label>
