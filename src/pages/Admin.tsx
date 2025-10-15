@@ -221,7 +221,7 @@ const EMPTY_FORM: ProductFormState = {
 };
 
 const Admin = () => {
-  const { isAdmin, loading: authLoading } = useAdminAuth();
+  const { isAdmin, loading: authLoading, user: adminUser } = useAdminAuth();
   const navigate = useNavigate();
 
   const [activeSection, setActiveSection] = useState<Section>('overview');
