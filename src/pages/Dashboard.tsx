@@ -40,7 +40,7 @@ function formatDate(iso: string) {
 }
 
 export default function Dashboard() {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const { items: cartItems, addToCart, count } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -152,10 +152,15 @@ export default function Dashboard() {
             <h1 className="text-3xl md:text-4xl font-black tracking-tighter">Welcome{user?.name ? `, ${user.name}` : ""}</h1>
             <p className="text-muted-foreground text-sm">Here is your recent activity</p>
           </div>
-          <Link to="/cart" className="relative inline-flex items-center">
-            <span className="text-sm mr-2">Cart Items:</span>
-            <span className="bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs font-bold">{count}</span>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/cart" className="relative inline-flex items-center">
+              <span className="text-sm mr-2">Cart Items:</span>
+              <span className="bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs font-bold">{count}</span>
+            </Link>
+            <Button variant="outline" onClick={async () => { try { await signOut(); navigate('/'); toast({ title: 'Signed out' }); } catch { navigate('/'); } }}>
+              Logout
+            </Button>
+          </div>
         </div>
 
         {/* Recent Orders */}

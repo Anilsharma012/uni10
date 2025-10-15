@@ -1,5 +1,5 @@
-import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { Navbar } from "@/components/Navbar";
 import { ProductCard } from "@/components/ProductCard";
 import { products } from "@/data/products";
 import { useState } from "react";
@@ -8,11 +8,10 @@ import { Button } from "@/components/ui/button";
 const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
-  const categories = ["All", ...Array.from(new Set(products.map(p => p.category)))];
+  const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
 
-  const filteredProducts = selectedCategory === "All" 
-    ? products 
-    : products.filter(p => p.category === selectedCategory);
+  const filteredProducts =
+    selectedCategory === "All" ? products : products.filter((p) => p.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,7 +41,7 @@ const Shop = () => {
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} {...product} />
+            <ProductCard key={(product as any).id} {...product} />
           ))}
         </div>
       </main>

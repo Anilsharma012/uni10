@@ -10,9 +10,8 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
 /* ========= Backend base & tiny helper ========= */
-const API_BASE =
-  (import.meta as any).env?.VITE_API_BASE_URL ||
-  (typeof window !== 'undefined' ? `${window.location.origin}` : '');
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '';
+// Use relative '/api' by default so previewed frontend calls the proxied backend.
 
 async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
