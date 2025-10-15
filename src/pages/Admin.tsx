@@ -459,24 +459,69 @@ const Admin = () => {
   const uploadFile = async (file: File) => {
     if (!file) return;
     setUploadingImage(true);
-    try {
+
+    const isLocalhost = (url: string) => {
+      try {
+        return url.includes('localhost') || url.includes('127.0.0.1');
+      } catch {
+        return false;
+      }
+    };
+
+    const tryUpload = async (uploadUrl: string) => {
       const fd = new FormData();
       fd.append('file', file);
-      const res = await fetch(`${API_BASE}/api/uploads`, {
+      const res = await fetch(uploadUrl, {
         method: 'POST',
         credentials: 'include',
         body: fd,
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.message || json?.error || 'Upload failed');
+      let json: any = null;
+      try {
+        json = await res.json();
+      } catch {
+        // ignore non-json
+      }
+      if (!res.ok) throw new Error(json?.message || json?.error || `${res.status} ${res.statusText}`);
+      return json;
+    };
+
+    try {
+      const base = API_BASE || '';
+      const primaryUrl = base.endsWith('/') ? `${base}api/uploads` : `${base}/api/uploads`;
+
+      // If API_BASE points to localhost but frontend isn't on localhost, try relative '/api/uploads' first
+      if (base && isLocalhost(base) && !location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1')) {
+        try {
+          const relJson = await tryUpload('/api/uploads');
+          const url = relJson?.url || relJson?.data?.url;
+          const full = url && url.startsWith('http') ? url : (url ? url : '/placeholder.svg');
+          setProductForm((p) => ({ ...p, image_url: full }));
+          toast.success('Image uploaded (via relative /api fallback)');
+          return;
+        } catch (relErr) {
+          console.warn('Relative upload failed, falling back to API_BASE upload:', relErr?.message || relErr);
+        }
+      }
+
+      // Try primary API_BASE upload
+      const json = await tryUpload(primaryUrl);
       const url = json?.url || json?.data?.url;
       if (url) {
         const full = url.startsWith('http') ? url : `${API_BASE}${url}`;
         setProductForm((p) => ({ ...p, image_url: full }));
         toast.success('Image uploaded');
+        return;
       }
+
+      // No url returned — use placeholder
+      setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
+      toast.warn('Upload did not return a URL; using placeholder image');
     } catch (err: any) {
-      toast.error(err?.message || 'Image upload failed');
+      // Final fallback: use placeholder image so the UI remains functional in preview
+      setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
+      toast.error(err?.message || 'Image upload failed — using placeholder');
+      console.warn('uploadFile error:', err);
     } finally {
       setUploadingImage(false);
     }
