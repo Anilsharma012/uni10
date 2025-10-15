@@ -295,6 +295,14 @@ const Admin = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, authLoading, adminUser]);
 
+  // When the admin navigates to Users tab, ensure we have latest users
+  useEffect(() => {
+    if (activeSection === 'users' && users.length === 0 && isAdmin) {
+      void fetchAdminResources();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSection]);
+
   const fetchAdminResources = async () => {
     try {
       setFetching(true);
@@ -823,7 +831,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
             <p className="text-sm text-muted-foreground">No users found.</p>
           )}
           {users.map((user) => (
-            <Card key={user.id as any}>
+            <Card key={(user as any)._id || (user as any).id}>
               <CardContent className="flex items-center justify-between p-4">
                 <div>
                   <h3 className="font-semibold">{(user as any).name || (user as any).fullName || 'User'}</h3>
@@ -832,7 +840,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                     <p className="text-sm text-muted-foreground">{(user as any).phone}</p>
                   )}
                 </div>
-                <Button size="icon" variant="destructive" onClick={() => deleteUser(user.id as any)}>
+                <Button size="icon" variant="destructive" onClick={() => deleteUser((user as any)._id || (user as any).id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </CardContent>
