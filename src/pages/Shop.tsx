@@ -17,6 +17,18 @@ type ProductRow = {
   images?: string[];
 };
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+const resolveImage = (src?: string) => {
+  const s = String(src || '');
+  if (!s) return '/placeholder.svg';
+  if (s.startsWith('http')) return s;
+  if (API_BASE) {
+    const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+    return s.startsWith('/') ? `${base}${s}` : `${base}/${s}`;
+  }
+  return s;
+};
+
 const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [products, setProducts] = useState<ProductRow[]>([]);
@@ -78,7 +90,8 @@ const Shop = () => {
             filteredProducts.map((p) => {
               const id = String(p._id || p.id || '');
               const title = p.title || p.name || '';
-              const img = p.image_url || (Array.isArray(p.images) ? p.images[0] : '') || '/placeholder.svg';
+              const rawImg = p.image_url || (Array.isArray(p.images) ? p.images[0] : '') || '/placeholder.svg';
+              const img = resolveImage(rawImg);
               return (
                 <ProductCard
                   key={id}
