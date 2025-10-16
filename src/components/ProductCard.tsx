@@ -33,12 +33,24 @@ export const ProductCard = ({ id, name, price, image, category }: ProductCardPro
     toast.success('Added to cart');
   };
 
+  const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '';
+  const src = (() => {
+    const s = String(image || '');
+    if (!s) return '/placeholder.svg';
+    if (s.startsWith('http')) return s;
+    if (API_BASE) {
+      const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+      return s.startsWith('/') ? `${base}${s}` : `${base}/${s}`;
+    }
+    return s;
+  })();
+
   return (
     <Card className="group overflow-hidden bg-card border-border hover:border-primary/50 transition-all duration-300">
       <Link to={`/product/${id}`}>
         <div className="aspect-square overflow-hidden bg-secondary">
           <img
-            src={image}
+            src={src}
             alt={name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
