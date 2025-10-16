@@ -8,7 +8,13 @@ router.get('/', authOptional, async (req, res) => {
   try {
     const { active, category, q, limit = 50, page = 1 } = req.query;
     const filter = {};
-    if (typeof active !== 'undefined') filter.active = active === 'true' || active === '1';
+    // By default, only return active products. Allow overriding with active=false or active=all
+    if (typeof active === 'undefined') {
+      filter.active = true;
+    } else if (String(active).toLowerCase() === 'false' || String(active) === '0') {
+      filter.active = false;
+    } // when active is 'all', do not set filter.active
+
     if (category) filter.category = category;
     if (q) filter.$or = [{ title: new RegExp(q, 'i') }, { category: new RegExp(q, 'i') }];
 
