@@ -623,11 +623,15 @@ const handleProductSubmit = async (e: React.FormEvent) => {
     if (!ok) return;
 
     try {
+      // optimistic update
+      setProducts((prev) => prev.filter((p: any) => String(p._id || p.id) !== String(id)));
       await apiFetch(`${ENDPOINTS.products}/${id}`, { method: 'DELETE' });
       toast.success('Product deleted');
       void fetchAdminResources();
     } catch (error: any) {
       toast.error(`Failed to delete product: ${error?.message ?? 'Unknown error'}`);
+      // revert on failure
+      void fetchAdminResources();
     }
   };
 
