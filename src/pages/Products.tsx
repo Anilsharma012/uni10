@@ -21,6 +21,18 @@ type ProductRow = {
   images?: string[];
 };
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+const resolveImage = (src?: string) => {
+  const s = String(src || '');
+  if (!s) return '/placeholder.svg';
+  if (s.startsWith('http')) return s;
+  if (API_BASE) {
+    const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+    return s.startsWith('/') ? `${base}${s}` : `${base}/${s}`;
+  }
+  return s;
+};
+
 const Products = () => {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -108,7 +120,8 @@ const Products = () => {
             {filteredProducts.map((product) => {
               const id = String(product._id || product.id || '');
               const title = product.title || product.name || '';
-              const img = product.image_url || (Array.isArray(product.images) ? product.images[0] : '') || '/placeholder.svg';
+              const rawImg = product.image_url || (Array.isArray(product.images) ? product.images[0] : '') || '/placeholder.svg';
+              const img = resolveImage(rawImg);
               return (
                 <Card
                   key={id}
