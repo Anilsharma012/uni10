@@ -475,7 +475,7 @@ const Admin = () => {
       // If API_BASE is explicitly localhost and we're in a remote preview, avoid upload attempts
       if (baseCheck && isLocalhost(baseCheck) && !location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1')) {
         setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
-        toast.warn('Backend is localhost and unreachable from preview — using placeholder image');
+        toast.warning('Backend is localhost and unreachable from preview — using placeholder image');
         setUploadingImage(false);
         return;
       }
@@ -484,7 +484,7 @@ const Admin = () => {
       // the relative endpoint will not reach the developer's backend. Avoid making the request and use placeholder.
       if (!baseCheck && !location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1')) {
         setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
-        toast.warn('Uploads are disabled in remote preview — using placeholder image');
+        toast.warning('Uploads are disabled in remote preview — using placeholder image');
         setUploadingImage(false);
         return;
       }
@@ -496,9 +496,13 @@ const Admin = () => {
       const fd = new FormData();
       fd.append('file', file);
       try {
+        const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
         const res = await fetch(uploadUrl, {
           method: 'POST',
           credentials: 'include',
+          headers,
           body: fd,
         });
         let json: any = null;
@@ -577,7 +581,7 @@ const Admin = () => {
 
       // No url returned — use placeholder
       setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
-      toast.warn('Upload did not return a URL; using placeholder image');
+      toast.warning('Upload did not return a URL; using placeholder image');
     } catch (err: any) {
       // Final fallback: use placeholder image so the UI remains functional in preview
       setProductForm((p) => ({ ...p, image_url: '/placeholder.svg' }));
