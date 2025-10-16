@@ -26,9 +26,11 @@ const resolveImage = (src?: string) => {
   const s = String(src || '');
   if (!s) return '/placeholder.svg';
   if (s.startsWith('http')) return s;
-  // Only prefix backend for uploaded assets
+  const isLocalBase = (() => { try { return API_BASE.includes('localhost') || API_BASE.includes('127.0.0.1'); } catch { return false; } })();
+  const isHttpsPage = (() => { try { return location.protocol === 'https:'; } catch { return false; } })();
+  // Only prefix backend for uploaded assets; avoid mixed-content by not prefixing localhost on https pages
   if (s.startsWith('/uploads') || s.startsWith('uploads')) {
-    if (API_BASE) {
+    if (API_BASE && !(isLocalBase && isHttpsPage)) {
       const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
       return s.startsWith('/') ? `${base}${s}` : `${base}/${s}`;
     }
