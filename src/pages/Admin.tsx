@@ -916,9 +916,11 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                       const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '';
                       if (!url) return '/placeholder.svg';
                       if (String(url).startsWith('http')) return url;
-                      if (API_BASE) {
-                        const base = API_BASE.endsWith('/') ? API_BASE.slice(0,-1) : API_BASE;
-                        return String(url).startsWith('/') ? `${base}${url}` : `${base}/${url}`;
+                      if (String(url).startsWith('/uploads') || String(url).startsWith('uploads')) {
+                        if (API_BASE) {
+                          const base = API_BASE.endsWith('/') ? API_BASE.slice(0,-1) : API_BASE;
+                          return String(url).startsWith('/') ? `${base}${url}` : `${base}/${url}`;
+                        }
                       }
                       return url;
                     })()}
