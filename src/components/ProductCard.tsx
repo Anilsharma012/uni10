@@ -38,9 +38,12 @@ export const ProductCard = ({ id, name, price, image, category }: ProductCardPro
     const s = String(image || '');
     if (!s) return '/placeholder.svg';
     if (s.startsWith('http')) return s;
-    if (API_BASE) {
-      const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
-      return s.startsWith('/') ? `${base}${s}` : `${base}/${s}`;
+    // Only prefix backend for uploaded assets, not local placeholders
+    if (s.startsWith('/uploads') || s.startsWith('uploads')) {
+      if (API_BASE) {
+        const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+        return s.startsWith('/') ? `${base}${s}` : `${base}/${s}`;
+      }
     }
     return s;
   })();
