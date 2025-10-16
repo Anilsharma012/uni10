@@ -38,9 +38,11 @@ export const ProductCard = ({ id, name, price, image, category }: ProductCardPro
     const s = String(image || '');
     if (!s) return '/placeholder.svg';
     if (s.startsWith('http')) return s;
-    // Only prefix backend for uploaded assets, not local placeholders
+    // Only prefix backend for uploaded assets; avoid mixed-content by not prefixing localhost on https pages
     if (s.startsWith('/uploads') || s.startsWith('uploads')) {
-      if (API_BASE) {
+      const isLocalBase = (() => { try { return API_BASE.includes('localhost') || API_BASE.includes('127.0.0.1'); } catch { return false; } })();
+      const isHttpsPage = (() => { try { return location.protocol === 'https:'; } catch { return false; } })();
+      if (API_BASE && !(isLocalBase && isHttpsPage)) {
         const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
         return s.startsWith('/') ? `${base}${s}` : `${base}/${s}`;
       }
