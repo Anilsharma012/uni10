@@ -763,7 +763,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 <span>Loading…</span>
               </div>
             ) : (
-              <p className="text-4xl font-bold">{totalSalesFormatted}</p>
+              <p className="text-4xl font-bold">{orders.length}</p>
             )}
           </CardContent>
         </Card>
