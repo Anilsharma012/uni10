@@ -907,7 +907,17 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               <CardContent className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-4">
                   <img
-                    src={(product as any).image_url || (product as any).images?.[0] || '/placeholder.svg'}
+                    src={(function(){
+                      const url = (product as any).image_url || (product as any).images?.[0] || '/placeholder.svg';
+                      const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '';
+                      if (!url) return '/placeholder.svg';
+                      if (String(url).startsWith('http')) return url;
+                      if (API_BASE) {
+                        const base = API_BASE.endsWith('/') ? API_BASE.slice(0,-1) : API_BASE;
+                        return String(url).startsWith('/') ? `${base}${url}` : `${base}/${url}`;
+                      }
+                      return url;
+                    })()}
                     alt={(product as any).name || (product as any).title || 'Product'}
                     className="w-16 h-16 object-cover rounded"
                     loading="lazy"
