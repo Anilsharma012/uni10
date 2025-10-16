@@ -52,8 +52,8 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
-// serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// serve uploaded files from server/uploads (same as multer destination)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // uploads endpoint
 app.use('/api/uploads', uploadsRoutes);
 
