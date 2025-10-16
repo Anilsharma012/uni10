@@ -917,7 +917,9 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                       if (!url) return '/placeholder.svg';
                       if (String(url).startsWith('http')) return url;
                       if (String(url).startsWith('/uploads') || String(url).startsWith('uploads')) {
-                        if (API_BASE) {
+                        const isLocalBase = (() => { try { return API_BASE.includes('localhost') || API_BASE.includes('127.0.0.1'); } catch { return false; } })();
+                        const isHttpsPage = (() => { try { return location.protocol === 'https:'; } catch { return false; } })();
+                        if (API_BASE && !(isLocalBase && isHttpsPage)) {
                           const base = API_BASE.endsWith('/') ? API_BASE.slice(0,-1) : API_BASE;
                           return String(url).startsWith('/') ? `${base}${url}` : `${base}/${url}`;
                         }
