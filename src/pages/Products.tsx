@@ -26,9 +26,12 @@ const resolveImage = (src?: string) => {
   const s = String(src || '');
   if (!s) return '/placeholder.svg';
   if (s.startsWith('http')) return s;
-  if (API_BASE) {
-    const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
-    return s.startsWith('/') ? `${base}${s}` : `${base}/${s}`;
+  // Only prefix backend for uploaded assets
+  if (s.startsWith('/uploads') || s.startsWith('uploads')) {
+    if (API_BASE) {
+      const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+      return s.startsWith('/') ? `${base}${s}` : `${base}/${s}`;
+    }
   }
   return s;
 };
